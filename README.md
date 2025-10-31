@@ -2,7 +2,7 @@
 
 ## Description
 
-a SageMath package to work with sign vectors, oriented matroids and chirotopes
+SageMath package for sign vectors, oriented matroids and chirotopes
 
 ## License
 
