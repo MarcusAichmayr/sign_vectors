@@ -48,13 +48,6 @@ Next, we define two sign vectors and compose them::
     sage: Y.compose(X)
     (-+++0)
 
-Use the operator ``&`` as a shorthand for composition::
-
-    sage: X & Y
-    (-++-0)
-    sage: Y & X
-    (-+++0)
-
 The conformal relation is a partial order on a set of sign vectors::
 
     sage: X = sign_vector([-1, 1, 0, 0, 1])
@@ -516,10 +509,6 @@ class SignVector(SageObject):
 
         Composition of this sign vector with ``other``.
 
-        .. NOTE::
-
-            Alternatively, the operator ``&`` can be used.
-
         EXAMPLES::
 
             sage: from sign_vectors import *
@@ -530,8 +519,6 @@ class SignVector(SageObject):
             sage: X.compose(Y)
             (+-0)
             sage: Y.compose(X)
-            (--0)
-            sage: Y & X
             (--0)
             sage: X = sign_vector('000+++---')
             sage: Y = sign_vector('0+-0+-0+-')
@@ -578,30 +565,6 @@ class SignVector(SageObject):
             self._positive_support | other._positive_support,
             self._negative_support | other._negative_support
         )
-
-    def __and__(self, other: SignVector) -> SignVector:
-        r"""
-        Return the composition of two sign vectors.
-
-        .. SEEALSO::
-
-            - :meth: `compose`
-
-        EXAMPLES::
-
-            sage: from sign_vectors import *
-            sage: X = sign_vector('+00')
-            sage: X
-            (+00)
-            sage: Y = sign_vector('--0')
-            sage: Y
-            (--0)
-            sage: X & Y
-            (+-0)
-            sage: Y & X
-            (--0)
-        """
-        return self.compose(other)
 
     def __mul__(self, value: int) -> SignVector:
         r"""
