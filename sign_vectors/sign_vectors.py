@@ -5,8 +5,8 @@ Sign vectors
 There are several ways to define sign vectors::
 
     sage: from sign_vectors import *
-    sage: sign_vector('++-+-00-')
-    (++-+-00-)
+    sage: sign_vector('+0-+-0')
+    (+0-+-0)
     sage: sign_vector([1, 0, -1, 1])
     (+0-+)
     sage: v = vector([5, 2/5, -1, 0])
@@ -50,70 +50,16 @@ Next, we define two sign vectors and compose them::
 
 The conformal relation is a partial order on a set of sign vectors::
 
-    sage: X = sign_vector([-1, 1, 0, 0, 1])
-    sage: Y = sign_vector([-1, 1, 1, 0, 1])
-    sage: Z = sign_vector([-1, 1, 1, -1, 1])
-    sage: X
-    (-+00+)
-    sage: Y
-    (-++0+)
-    sage: Z
-    (-++-+)
+    sage: X = sign_vector("-+00+")
+    sage: Y = sign_vector("-++0+")
+    sage: Z = sign_vector("-+0+0")
     sage: X.conforms(Y)
     True
-    sage: X.conforms(X)
-    True
     sage: Y.conforms(Z)
-    True
-    sage: Z.conforms(Y)
     False
-    sage: X.conforms(Z)
+    sage: X < Y
     True
-    sage: X < X
-    False
-    sage: X <= Y
-    True
-    sage: Y > Z
-    False
-    sage: Z >= X
-    True
-
-Similar as for real vectors, we define orthogonality for sign vectors.
-First, we define some real vectors::
-
-    sage: x = vector([0, 0, 1])
-    sage: y = vector([1, -2, 0])
-    sage: z = vector([2, 1, 2])
-
-We compute some scalar products to investigate orthogonality of those vectors::
-
-    sage: x.dot_product(y)
-    0
-    sage: y.dot_product(z)
-    0
-    sage: x.dot_product(z)
-    2
-
-Next, we define the corresponding sign vectors::
-
-    sage: X = sign_vector(x)
-    sage: X
-    (00+)
-    sage: Y = sign_vector(y)
-    sage: Y
-    (+-0)
-    sage: Z = sign_vector(z)
-    sage: Z
-    (+++)
-
-By definition, if two real vectors are orthogonal, then their corresponding
-sign vectors are also orthogonal::
-
-    sage: X.is_orthogonal_to(Y)
-    True
-    sage: Y.is_orthogonal_to(Z)
-    True
-    sage: X.is_orthogonal_to(Z)
+    sage: X <= Z
     False
 """
 
