@@ -1149,7 +1149,7 @@ class OrientedMatroid(_OrientedMatroidFromMatrix):
     EXAMPLES:
 
     There are several ways to initialize an oriented matroid.
-    First, we define an oriented matroid from a matrix::
+    One natural approach is to use a matrix::
 
         sage: from sign_vectors import *
         sage: M = matrix([[1, 1, 0, 0], [0, 1, 1, -1]])
