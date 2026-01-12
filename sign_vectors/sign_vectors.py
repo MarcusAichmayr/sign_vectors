@@ -367,18 +367,6 @@ class SignVector(SageObject):
     
     @property
     def _zero_support(self) -> FrozenBitset:
-        r"""
-        Return a list of indices where the sign vector is zero.
-
-        EXAMPLES::
-
-            sage: from sign_vectors import *
-            sage: X = sign_vector("-0+-0")
-            sage: X
-            (-0+-0)
-            sage: X.zero_support()
-            [1, 4]
-        """
         return ~self._support()
 
     def positive_support(self) -> list[int]:
@@ -1125,57 +1113,10 @@ class SignVector(SageObject):
         from sign_vectors.partial_sign_vectors import PartialSignVector
         return PartialSignVector(self._negative_support, self._zero_support, self._positive_support)
      
-    def lower_closure(self) -> PartialSignVector:
-        r"""
-        Return the lower closure of the partial sign vector.
-
-        EXAMPLES::
-
-            sage: from sign_vectors import *
-            sage: X = sign_vector("+-00+-")
-            sage: X.lower_closure()
-            (pn00pn)
-
-        """
-        from sign_vectors.partial_sign_vectors import PartialSignVector
-        return PartialSignVector(self._negative_support,
-                               ~ FrozenBitset([], capacity=self.length()),
-                               self._positive_support)
-    
-    def upper_closure(self) -> PartialSignVector:
-        r"""
-        Return the upper closure of the sign vector.
-
-        EXAMPLES::
-
-            sage: from sign_vectors import *
-            sage: X = sign_vector("+-00+-")
-            sage: X.upper_closure()
-            (+-**+-)
-
-        """
-        from sign_vectors.partial_sign_vectors import PartialSignVector
-        return PartialSignVector(self._negative_support | self._zero_support,
-                               self._zero_support,
-                               self._positive_support | self._zero_support)
-    
-    def closure(self) -> PartialSignVector:
-       r"""
-        Return the closure of the sign vector.
-
-        EXAMPLES::
-
-            sage: from sign_vectors import *
-            sage: X = sign_vector("+-00+-")
-            sage: X.closure()
-            (pn**pn)
-
-        """
-       from sign_vectors.partial_sign_vectors import PartialSignVector
-       return PartialSignVector(self._negative_support | self._zero_support,
-                               ~ FrozenBitset([], capacity=self.length()),
-                               self._positive_support | self._zero_support) 
-        
+    def extend(self):
+        r"""Return the sign vector as the partial sign vector. Enables the functions upper_closure, lower_closure, closure and orthogonal_complement"""
+        from sign_vectors.partial_sign_vectors import ExtendedSignVector
+        return ExtendedSignVector(self._positive_support, self._negative_support)
 
     @classmethod
     def zero(cls, length: int) -> SignVector:

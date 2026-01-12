@@ -15,7 +15,7 @@ Functions for sets of sign vectors
 
 from sage.combinat.posets.posets import Poset
 
-from . import SignVector, zero_sign_vector
+from . import SignVector, zero_sign_vector, PartialSignVector
 
 
 def lower_closure(iterable: set[SignVector]) -> set[SignVector]:
@@ -152,6 +152,55 @@ def upper_closure(iterable: set[SignVector]) -> set[SignVector]:
                 same_support_list[i - 1].add(sv.set_to_minus([s]))
 
     return set().union(*same_support_list)
+
+def orthogonal_complement(iterable: set[SignVector]) -> set[PartialSignVector]:
+    r"""
+    Compute the orthogonal complement of given sign vectors.
+    INPUT:
+
+    - ``iterable`` -- an iterable of sign vectors
+
+    OUTPUT:
+    Return the orthogonal complement of ``iterable`` as a set of partial sign vectors.
+
+    EXAMPLES:
+
+    We consider a list consisting of only one sign vector::
+
+        sage: from sign_vectors import *
+        sage: W = sign_vector("+-0").extend()
+        sage: W
+        (+-0)
+        sage: orthogonal_complement([W])
+        {(00*), (++*), (--*)}
+        sage: W.orthogonal_complement()
+        [(00*), (++*), (--*)]
+
+    Now, we consider a list of three sign vectors::
+
+        sage: W = [sign_vector("++-"), sign_vector("-00"), sign_vector("0--")]
+        sage: W
+        [(++-), (-00), (0--)]
+        sage: orthogonal_complement(W)
+        {(000)}
+        sage: W = [sign_vector("++-0"), sign_vector("+++0"), sign_vector("++00")]
+        sage: W
+        [(++-0), (+++0), (++00)]
+        sage: orthogonal_complement(W)
+        {(-+**), (+-**), (000*)}
+    """
+    iterable = [X.extend() for X in iterable]
+    res = set(iterable.pop().orthogonal_complement())
+    temp = set()
+    
+
+    for X in iterable:
+        for Y in res:
+            temp.update(X.orthogonal_complement(Y))
+        res = temp.copy()
+        temp = set()
+
+    return res
 
 def contraction(iterable: set[SignVector], indices: list[int]) -> set[SignVector]:
     r"""

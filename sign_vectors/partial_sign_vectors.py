@@ -95,6 +95,7 @@ from sage.data_structures.bitset import FrozenBitset
 from sage.structure.sage_object import SageObject
 from sage.rings.integer import Integer
 from .sign_vectors import SignVector
+from itertools import permutations
 
 def partial_sign_vector(iterable: list[list[int]] | str | SignVector | PartialSignVector) -> PartialSignVector:
     r"""
@@ -592,15 +593,13 @@ class PartialSignVector(SageObject):
 
     def _connecting_elements(self, other: SignVector | PartialSignVector) -> FrozenBitset:
         if type(other) is SignVector:
-            return (self._determined_positive_support() & other._positive_support) | (self._determined_negative_support() & other._negative_support)
-        if type(other) is PartialSignVector:
-            return (self._determined_positive_support() & other._determined_positive_support()) | (self._determined_negative_support() & other._determined_negative_support())
+            other = other.extend()
+        return (self._determined_positive_support() & other._determined_positive_support()) | (self._determined_negative_support() & other._determined_negative_support())
 
     def _separating_elements(self, other: SignVector | PartialSignVector) -> FrozenBitset:
         if type(other) is SignVector:
-            return (self._determined_positive_support() & other._negative_support) | (self._determined_negative_support()  & other._positive_support)
-        if type(other) is PartialSignVector:
-            return (self._determined_positive_support() & other._determined_negative_support()) | (self._determined_negative_support()  & other._determined_positive_support())
+            other = other.extend()
+        return (self._determined_positive_support() & other._determined_negative_support()) | (self._determined_negative_support()  & other._determined_positive_support())
         
     def connecting_elements(self, other: SignVector | PartialSignVector) -> list[int]:
         r"""
@@ -972,8 +971,10 @@ class PartialSignVector(SageObject):
         """
         return len(self) == len(self.determined_support())
     
-    def to_sign_vector(self) -> bool:
+    def to_sign_vector(self, extended=True) -> bool:
         if self.is_sign_vector():
+            if extended:
+                return ExtendedSignVector(self._positive_support, self._negative_support)
             return SignVector(self._positive_support, self._negative_support)
         return Exception("not a sign vector")
     
@@ -1203,3 +1204,132 @@ class PartialSignVector(SageObject):
             (0+-0+0)
         """
         return cls(sv._negative_support, sv._zero_support, sv._positive_support)
+    
+class  ExtendedSignVector(SignVector):
+
+    def __init__(self, positive_support: FrozenBitset, negative_support: FrozenBitset) -> None:
+        super().__init__(positive_support, negative_support)
+
+    def _determined_positive_support(self) -> FrozenBitset:
+        return self._positive_support
+    
+    def _determined_negative_support(self) -> FrozenBitset:
+        return self._negative_support
+
+    def lower_closure(self) -> PartialSignVector:
+        r"""
+        Return the lower closure of the partial sign vector.
+
+        EXAMPLES::
+
+            sage: from sign_vectors import *
+            sage: X = sign_vector("+-00+-").extend()
+            sage: X.lower_closure()
+            (pn00pn)
+
+        """
+        return PartialSignVector(self._negative_support,
+                               ~ FrozenBitset([], capacity=self.length()),
+                               self._positive_support)
+    
+    def upper_closure(self) -> PartialSignVector:
+        r"""
+        Return the upper closure of the sign vector.
+
+        EXAMPLES::
+
+            sage: from sign_vectors import *
+            sage: X = sign_vector("+-00+-").extend()
+            sage: X.upper_closure()
+            (+-**+-)
+
+        """
+
+        return PartialSignVector(self._negative_support | self._zero_support,
+                               self._zero_support,
+                               self._positive_support | self._zero_support)
+    
+    def closure(self) -> PartialSignVector:
+       r"""
+        Return the closure of the sign vector.
+
+        EXAMPLES::
+
+            sage: from sign_vectors import *
+            sage: X = sign_vector("+-00+-").extend()
+            sage: X.closure()
+            (pn**pn)
+
+        """
+       return PartialSignVector(self._negative_support | self._zero_support,
+                               ~ FrozenBitset([], capacity=self.length()),
+                               self._positive_support | self._zero_support) 
+    
+    def orthogonal_complement(self, other=None) -> list[PartialSignVector]:
+        r"""
+        Compute the orthogonal complepent of the sign vector in a partial sign vector. If no argument is given,
+        the complete orthogonal complement of the sign vector is given.
+
+        INPUT:
+
+        - ``other`` -- partial sign vector or None
+
+        OUTPUT:
+        List of partial sign vectors.
+
+        .. NOTE::
+
+            The partial sign vector ``other`` should only contain th signs -, 0, + and *.
+            For efficiency, this is not checked.
+
+        EXAMPLES::
+
+            sage: from sign_vectors import *
+            sage: from sign_vectors.partial_sign_vectors import *
+            sage: X = sign_vector("++00-").extend()
+            sage: X
+            (++00-)
+            sage: X.orthogonal_complement()
+            [(00**0), (+-***), (+***+), (-+***), (*+**+), (-***-), (*-**-)]
+            sage: Y = partial_sign_vector("**-+*")
+            sage: Y
+            (**-+*)
+            sage: X.orthogonal_complement(Y)
+            [(00-+0), (+--+*), (+*-++), (-+-+*), (*+-++), (-*-+-), (*--+-)]
+            sage: Y = partial_sign_vector("****-")
+            sage: Y
+            (****-)
+            sage: X.orthogonal_complement(Y)
+            [(-***-), (*-**-)]
+            sage: Y = partial_sign_vector("*+-+-")
+            sage: Y
+            (*+-+-)
+            sage: X.orthogonal_complement(Y)
+            [(-+-+-)]
+        """
+
+        if other is None:
+            other = PartialSignVector.star(self.length())
+        res = []
+        if other._connecting_elements(self).isempty() and other._separating_elements(self).isempty():
+            res.append(PartialSignVector(other._negative_support - self._support(),
+                                         other._zero_support,
+                                         other._positive_support - self._support()))
+            
+            for c, d in permutations(list(self._support() & other._undetermined_support()), 2):
+                Z = other.set_sign([c],[self[c]])
+                Z = Z.set_sign([d],[-self[d]])
+                res.append(Z)
+
+        elif not( other._connecting_elements(self).isempty() or other._separating_elements(self).isempty()):
+            return [other]
+        
+        elif not other._connecting_elements(self).isempty():
+            for d in list(self._support() & other._undetermined_support()):
+                res.append(other.set_sign([d],[-self[d]]))
+        
+        elif not other._separating_elements(self).isempty():
+            for c in list(self._support() & other._undetermined_support()):
+                res.append(other.set_sign([c],[self[c]]))
+
+        return res
