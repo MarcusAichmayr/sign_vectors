@@ -717,11 +717,10 @@ class PartialSignVector(SageObject):
         """
         
         if type(other) is SignVector:
-            if (~(self._determined_zero_support() | other._zero_support)).isempty():
-                return True 
-        if type(other) is PartialSignVector:
-            if (~(self._determined_zero_support() | other._determined_zero_support())).isempty():
-                return True  
+            other = other.extend()
+
+        if (~(self._determined_zero_support() | other._determined_zero_support())).isempty():
+            return True  
         
         return not(self._separating_elements(other).isempty() or self._connecting_elements(other).isempty())
 
@@ -781,7 +780,7 @@ class PartialSignVector(SageObject):
             sage: 0 == PartialSignVector.zero(3)
             True
         """
-        if type(other) is PartialSignVector or type(other) is SignVector:
+        if type(other) is PartialSignVector or type(other) is SignVector or type(other) is ExtendedSignVector:
             return (
                 self._negative_support == other._negative_support
                 and self._positive_support == other._positive_support
