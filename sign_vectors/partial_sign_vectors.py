@@ -593,12 +593,12 @@ class PartialSignVector(SageObject):
 
     def _connecting_elements(self, other: SignVector | PartialSignVector) -> FrozenBitset:
         if type(other) is SignVector:
-            other = other.extend()
+            other = ExtendedSignVector.from_sign_vector(other)
         return (self._determined_positive_support() & other._determined_positive_support()) | (self._determined_negative_support() & other._determined_negative_support())
 
     def _separating_elements(self, other: SignVector | PartialSignVector) -> FrozenBitset:
         if type(other) is SignVector:
-            other = other.extend()
+            other = ExtendedSignVector.from_sign_vector(other)
         return (self._determined_positive_support() & other._determined_negative_support()) | (self._determined_negative_support()  & other._determined_positive_support())
         
     def connecting_elements(self, other: SignVector | PartialSignVector) -> list[int]:
@@ -717,7 +717,7 @@ class PartialSignVector(SageObject):
         """
         
         if type(other) is SignVector:
-            other = other.extend()
+            other = ExtendedSignVector.from_sign_vector(other)
 
         if (~(self._determined_zero_support() | other._determined_zero_support())).isempty():
             return True  
@@ -1222,7 +1222,7 @@ class  ExtendedSignVector(SignVector):
         EXAMPLES::
 
             sage: from sign_vectors import *
-            sage: X = sign_vector("+-00+-").extend()
+            sage: X = ExtendedSignVector.from_sign_vector(sign_vector("+-00+-"))
             sage: X.lower_closure()
             (pn00pn)
 
@@ -1238,7 +1238,7 @@ class  ExtendedSignVector(SignVector):
         EXAMPLES::
 
             sage: from sign_vectors import *
-            sage: X = sign_vector("+-00+-").extend()
+            sage: X = ExtendedSignVector.from_sign_vector(sign_vector("+-00+-"))
             sage: X.upper_closure()
             (+-**+-)
 
@@ -1255,7 +1255,7 @@ class  ExtendedSignVector(SignVector):
         EXAMPLES::
 
             sage: from sign_vectors import *
-            sage: X = sign_vector("+-00+-").extend()
+            sage: X = ExtendedSignVector.from_sign_vector(sign_vector("+-00+-"))
             sage: X.closure()
             (pn**pn)
 
@@ -1285,7 +1285,7 @@ class  ExtendedSignVector(SignVector):
 
             sage: from sign_vectors import *
             sage: from sign_vectors.partial_sign_vectors import *
-            sage: X = sign_vector("++00-").extend()
+            sage: X = ExtendedSignVector.from_sign_vector(sign_vector("++00-"))
             sage: X
             (++00-)
             sage: X.orthogonal_complement()
@@ -1332,3 +1332,8 @@ class  ExtendedSignVector(SignVector):
                 res.append(other.set_sign([c],[self[c]]))
 
         return res
+    
+    @classmethod
+    def from_sign_vector(cls, sign_vector: SignVector) -> ExtendedSignVector:
+        """Create an extended sign vector from a sign vector."""
+        return cls(sign_vector._positive_support, sign_vector._negative_support)

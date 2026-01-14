@@ -15,7 +15,7 @@ Functions for sets of sign vectors
 
 from sage.combinat.posets.posets import Poset
 
-from . import SignVector, zero_sign_vector, PartialSignVector
+from . import SignVector, zero_sign_vector, PartialSignVector, ExtendedSignVector
 
 
 def lower_closure(iterable: set[SignVector]) -> set[SignVector]:
@@ -168,7 +168,7 @@ def orthogonal_complement(iterable: set[SignVector]) -> set[PartialSignVector]:
     We consider a list consisting of only one sign vector::
 
         sage: from sign_vectors import *
-        sage: W = sign_vector("+-0").extend()
+        sage: W = ExtendedSignVector.from_sign_vector(sign_vector("+-0"))
         sage: W
         (+-0)
         sage: orthogonal_complement([W])
@@ -189,7 +189,7 @@ def orthogonal_complement(iterable: set[SignVector]) -> set[PartialSignVector]:
         sage: orthogonal_complement(W)
         {(-+**), (+-**), (000*)}
     """
-    iterable = [X.extend() for X in iterable]
+    iterable = [ExtendedSignVector.from_sign_vector(X) for X in iterable]
     res = set(iterable.pop().orthogonal_complement())
     temp = set()
     

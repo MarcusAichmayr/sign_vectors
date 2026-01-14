@@ -1113,11 +1113,6 @@ class SignVector(SageObject):
         from sign_vectors.partial_sign_vectors import PartialSignVector
         return PartialSignVector(self._negative_support, self._zero_support, self._positive_support)
      
-    def extend(self):
-        r"""Return the sign vector as the partial sign vector. Enables the functions upper_closure, lower_closure, closure and orthogonal_complement"""
-        from sign_vectors.partial_sign_vectors import ExtendedSignVector
-        return ExtendedSignVector(self._positive_support, self._negative_support)
-
     @classmethod
     def zero(cls, length: int) -> SignVector:
         r"""
