@@ -6,6 +6,7 @@ Functions for sets of sign vectors
 #############################################################################
 #  Copyright (C) 2025                                                       #
 #          Marcus S. Aichmayr (aichmayr@mathematik.uni-kassel.de)           #
+#          Arne Jenß (arne.jenss@uni-kassel.de)                             #
 #                                                                           #
 #  Distributed under the terms of the GNU General Public License (GPL)      #
 #  either version 3, or (at your option) any later version                  #
@@ -286,3 +287,51 @@ def plot_sign_vectors(iterable: set[SignVector], vertex_size: int = 600, figsize
         element_color="white",
         vertex_shape="",
     ).show(figsize=figsize, aspect_ratio=aspect_ratio)
+
+def prune(iterable: set[PartialSignVector]) -> set[PartialSignVector]:
+    r"""
+    Remove all partial sign vectors that are subsets of other partial sign vectors in the iterable.
+
+    INPUT:
+
+    - ``iterable`` -- an iterable of partial sign vectors
+
+    OUTPUT:
+    Return a pruned set of partial sign vectors.
+
+    EXAMPLES::
+
+        sage: from sign_vectors import *
+        sage: W = [partial_sign_vector("+**"), partial_sign_vector("-*+"), partial_sign_vector("-++"), partial_sign_vector("+-*")]
+        sage: W
+        [(+**), (-*+), (-++), (+-*)]
+        sage: prune(W)
+        {(-*+), (+**)}
+
+    """
+    if not iterable:
+        return set()
+
+    max_cardinality_length = 1
+    same_cardinality_list = [set()]
+
+    for x in iterable:
+        while x.cardinality() >= max_cardinality_length:
+            same_cardinality_list.append(set())
+            max_cardinality_length += 1
+
+        same_cardinality_list[x.cardinality()-1].add(x)
+    res = set()
+
+    for i in range(max_cardinality_length-1, 0, -1):
+        for x in same_cardinality_list[i]:
+            subset_flag = False
+            for y in res:
+                if x.issubset(y):
+                    subset_flag = True
+                    break
+            if not subset_flag:
+                res.add(x)
+
+    return res
+

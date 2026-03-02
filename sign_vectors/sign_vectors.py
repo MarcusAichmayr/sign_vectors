@@ -1107,12 +1107,7 @@ class SignVector(SageObject):
         r"""Return the hash value of this sign vector."""
 
         return hash((self._positive_support, self._negative_support))
-    
-    def to_partial_sign_vector(self) -> PartialSignVector:
-        r"""Return the sign vector as the partial sign vector."""
-        from sign_vectors.partial_sign_vectors import PartialSignVector
-        return PartialSignVector(self._negative_support, self._zero_support, self._positive_support)
-     
+         
     @classmethod
     def zero(cls, length: int) -> SignVector:
         r"""

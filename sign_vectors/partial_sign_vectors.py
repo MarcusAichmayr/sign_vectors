@@ -80,6 +80,7 @@ The issubset function is a partial order on a set of partial sign vectors::
 #############################################################################
 #  Copyright (C) 2025                                                       #
 #          Marcus S. Aichmayr (aichmayr@mathematik.uni-kassel.de)           #
+#          Arne Jenß (arne.jenss@uni-kassel.de)                             #
 #                                                                           #
 #  Distributed under the terms of the GNU General Public License (GPL)      #
 #  either version 3, or (at your option) any later version                  #
@@ -88,6 +89,7 @@ The issubset function is a partial order on a set of partial sign vectors::
 #############################################################################
 
 from __future__ import annotations
+from types import NoneType
 import warnings
 from random import choices
 
@@ -759,6 +761,242 @@ class PartialSignVector(SageObject):
             True
         """
         return self._positive_support.issubset(other._positive_support) and self._negative_support.issubset(other._negative_support) and self._zero_support.issubset(other._zero_support)
+
+    def _intersection(self, other: PartialSignVector) -> PartialSignVector|NoneType:
+        r"""
+        Return the intersection of two partial sign vectors.
+
+        INPUT:
+
+        - ``other`` -- a partial sign vector
+
+        OUTPUT:
+
+        The intersection of this partial sign vector with ``other``.
+
+        EXAMPLES::
+
+            sage: from sign_vectors.partial_sign_vectors import *
+            sage: X = partial_sign_vector("n+0-+")
+            sage: X
+            (n+0-+)
+            sage: Y = partial_sign_vector("-*0-+")
+            sage: Y
+            (-*0-+)
+            sage: X.intersection(Y)
+            (-+0-+)
+        """
+
+        n_support = self._negative_support & other._negative_support
+        z_support = self._zero_support & other._zero_support
+        p_support = self._positive_support & other._positive_support
+        if not (n_support.isempty() or z_support.isempty() or p_support.isempty()):
+            return self.__class__(
+                n_support,
+                z_support,
+                p_support
+            )
+        return None
+
+    def intersection(self, other: PartialSignVector|set[PartialSignVector]) -> PartialSignVector|NoneType:
+        r"""
+        Return the intersection of two or more partial sign vectors.
+
+        INPUT:
+
+        - ``other`` -- a partial sign vector
+
+        OUTPUT:
+
+        The intersection of this partial sign vector with ``other``.
+
+        EXAMPLES::
+
+            sage: from sign_vectors.partial_sign_vectors import *
+            sage: X = partial_sign_vector("n+0-+")
+            sage: X
+            (n+0-+)
+            sage: Y = partial_sign_vector("-*0-+")
+            sage: Y
+            (-*0-+)
+            sage: X.intersection(Y)
+            (-+0-+)
+        """
+        if isinstance(other, PartialSignVector):
+            return self._intersection(other)
+        
+        inter = self
+        for o in other:
+            inter = inter._intersection(o)
+            if inter is None:
+                return None
+        return inter
+    
+    def _setminus(self, other: PartialSignVector) -> set[PartialSignVector]:
+        r"""
+        Return the set difference of two partial sign vectors.
+
+        INPUT:
+
+        - ``other`` -- a partial sign vector
+
+        OUTPUT:
+
+        The set difference of this partial sign vector with ``other``.
+
+        EXAMPLES::
+
+            sage: from sign_vectors.partial_sign_vectors import *
+            sage: X = partial_sign_vector("n+0-+")
+            sage: X
+            (n+0-+)
+            sage: Y = partial_sign_vector("-*0-+")
+            sage: Y
+            (-*0-+)
+            sage: Z = partial_sign_vector("*****")
+            sage: X._setminus(Y)
+            {(0+0-+)}
+            sage: X._setminus(Z)
+            set()
+            sage: Z._setminus(X)
+            {(+****), (*n***), (****n), (**/**), (***p*)}
+            sage: Z.setminus(Y)
+            {(**/**), (***p*), (p****), (****n)}
+
+        """
+        inter = self.intersection(other)
+        if inter is None:
+            return {self}
+        if inter == self:
+            return set()
+        
+        n_minus = self._negative_support - inter._negative_support
+        z_minus = self._zero_support - inter._zero_support
+        p_minus = self._positive_support - inter._positive_support
+
+        minus_support = n_minus | z_minus | p_minus
+
+        res = set()
+        length = self.length()
+        for i in minus_support:
+           index = FrozenBitset([i], capacity=length)
+
+           n_support = self._negative_support - index if i not in n_minus else self._negative_support
+           z_support = self._zero_support - index if i not in z_minus else self._zero_support
+           p_support = self._positive_support - index if i not in p_minus else self._positive_support
+           res.add(self.__class__(n_support, z_support, p_support))
+
+        return res
+    
+    def setminus(self, other: PartialSignVector|set[PartialSignVector]) -> set[PartialSignVector]:
+        r"""
+        Return the set difference of two or more partial sign vectors.
+
+        INPUT:
+
+        - ``other`` -- a partial sign vector
+
+        OUTPUT:
+
+        The set difference of this partial sign vector with ``other``.
+
+        EXAMPLES::
+
+            sage: from sign_vectors.partial_sign_vectors import *
+            sage: X = partial_sign_vector("n+0-+")
+            sage: X
+            (n+0-+)
+            sage: Y = partial_sign_vector("-*0-+")
+            sage: Y
+            (-*0-+)
+            sage: Z = partial_sign_vector("*****")
+            sage: X.setminus(Y)
+            {(0+0-+)}
+            sage: X.setminus(Z)
+            set()
+            sage: Z.setminus({X,Y})
+            {(+***n),
+             (+*/**),
+             (p***n),
+             (p*/**),
+             (****n),
+             (+**p*),
+             (p**p*),
+             (**/**),
+             (***p*),
+             (+****),
+             (*n**n),
+             (*n/**),
+             (*n*p*),
+             (**/*n),
+             (pn***),
+             (***pn),
+             (**/p*)}
+
+        """
+        if isinstance(other, PartialSignVector):
+            return self._setminus(other)
+        
+        res = {self}
+        for o in other:
+            new_res = set()
+            for r in res:
+                new_res = new_res.union(r._setminus(o))
+            res = new_res
+        return  res
+    
+    def union(self, other: PartialSignVector) -> set[PartialSignVector]:
+        r"""
+        Return the disjoint union of two partial sign vectors.
+
+        INPUT:
+
+        - ``other`` -- a partial sign vector
+
+        OUTPUT:
+
+        The union of this partial sign vector with ``other``.
+
+        EXAMPLES::
+
+            sage: from sign_vectors.partial_sign_vectors import *
+            sage: X = partial_sign_vector("n+0-+")
+            sage: X
+            (n+0-+)
+            sage: Y = partial_sign_vector("-*0-+")
+            sage: Y
+            (-*0-+)
+            sage: X.union(Y)
+            {(-n0-+), (n+0-+)}
+            
+        """
+        if self.issubset(other):
+            return {other}
+        if other.issubset(self):
+            return {self}
+
+        return {self}.union(other.setminus(self))
+    
+    def complement(self) -> set[PartialSignVector]:
+        r"""
+        Return the complement of this partial sign vector.
+
+        OUTPUT:
+
+        The complement of this partial sign vector.
+
+        EXAMPLES::
+
+            sage: from sign_vectors.partial_sign_vectors import *
+            sage: X = partial_sign_vector("n*0-+")
+            sage: X
+            (n*0-+)
+            sage: C = X.complement(); C
+            {(**/**), (+****), (***p*), (****n)}
+            sage: CC = set().union(*(c.complement() for c in C)); CC
+            {(****+), (***-*), (n****), (**0**)}
+        """
+        return PartialSignVector.star(self.length()).setminus(self)
 
     def __eq__(self, other: SignVector | PartialSignVector) -> bool:
         r"""
