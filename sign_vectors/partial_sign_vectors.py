@@ -785,12 +785,19 @@ class PartialSignVector(SageObject):
             (-*0-+)
             sage: X.intersection(Y)
             (-+0-+)
+            sage: X = partial_sign_vector("**-")
+            sage: Y = partial_sign_vector("+++")
+            sage: X.intersection(Y) is None
+            True
+
         """
 
         n_support = self._negative_support & other._negative_support
         z_support = self._zero_support & other._zero_support
         p_support = self._positive_support & other._positive_support
-        if not (n_support.isempty() or z_support.isempty() or p_support.isempty()):
+
+        empty_support = ~(n_support | z_support | p_support)
+        if empty_support.isempty():
             return self.__class__(
                 n_support,
                 z_support,
@@ -915,23 +922,7 @@ class PartialSignVector(SageObject):
             sage: X.setminus(Z)
             set()
             sage: Z.setminus({X,Y})
-            {(+***n),
-             (+*/**),
-             (p***n),
-             (p*/**),
-             (****n),
-             (+**p*),
-             (p**p*),
-             (**/**),
-             (***p*),
-             (+****),
-             (*n**n),
-             (*n/**),
-             (*n*p*),
-             (**/*n),
-             (pn***),
-             (***pn),
-             (**/p*)}
+            {(+****), (pn***), (p**p*), (p***n), (p*/**), (**/**), (***p*), (****n)}
 
         """
         if isinstance(other, PartialSignVector):
