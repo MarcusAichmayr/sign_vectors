@@ -1,6 +1,6 @@
 r"""
 Partial sign vectors
-============
+====================
 
 There are several ways to define partial sign vectors::
 
@@ -8,7 +8,7 @@ There are several ways to define partial sign vectors::
     sage: from sign_vectors import *
     sage: partial_sign_vector("+/-+p0n")
     (+/-+p0n)
-    sage: partial_sign_vector([[1], [0,1], [-1,0,1], [1]])
+    sage: partial_sign_vector([[1], [0, 1], [-1, 0, 1], [1]])
     (+p*+)
     sage: v = vector([5, 2/5, -1, 0])
     sage: v = sign_vector(v)
@@ -24,7 +24,6 @@ We construct the star partial sign vector of a given length::
 
     sage: PartialSignVector.star(6)
     (******)
-
 
 There are different notions of support::
 
@@ -90,14 +89,13 @@ The issubset function is a partial order on a set of partial sign vectors::
 
 from __future__ import annotations
 from types import NoneType
-import warnings
-from random import choices
 
 from sage.data_structures.bitset import FrozenBitset
 from sage.structure.sage_object import SageObject
 from sage.rings.integer import Integer
-from .sign_vectors import SignVector
+from . import SignVector
 from itertools import permutations
+
 
 def partial_sign_vector(iterable: list[list[int]] | str | SignVector | PartialSignVector) -> PartialSignVector:
     r"""
@@ -133,7 +131,6 @@ def partial_sign_vector(iterable: list[list[int]] | str | SignVector | PartialSi
         sage: partial_sign_vector("++n*-0/p")
         (++n*-0/p)
 
-
     TESTS::
 
         sage: partial_sign_vector(partial_sign_vector("+-+"))
@@ -146,9 +143,6 @@ def partial_sign_vector(iterable: list[list[int]] | str | SignVector | PartialSi
     if isinstance(iterable, str):
         return PartialSignVector.from_string(iterable)
     return PartialSignVector.from_iterable(iterable)
-
-
-
 
 
 class PartialSignVector(SageObject):
@@ -181,7 +175,6 @@ class PartialSignVector(SageObject):
             sage: PartialSignVector(FrozenBitset([1, 3], capacity=4), FrozenBitset([0], capacity=4), FrozenBitset([2,3], capacity=4))
             (0-+/)
         """
-        
         self._negative_support = negative_support
         self._zero_support = zero_support
         self._positive_support = positive_support
@@ -236,7 +229,7 @@ class PartialSignVector(SageObject):
             res.append(0)
         if e in self._positive_support:
             res.append(1)
-        
+
         return res
 
     def to_string(self, index=None) -> str:
@@ -259,7 +252,7 @@ class PartialSignVector(SageObject):
         """
         if index is None:
             return "".join(self.to_string(index=e) for e in range(self.length()))
-        
+
         if self[index] == [-1]:
             return "-"
         if self[index] == [0]:
@@ -274,7 +267,6 @@ class PartialSignVector(SageObject):
             return "p"
         if self[index] == [-1, 0, 1]:
             return "*"
-
 
     def length(self) -> int:
         r"""
@@ -320,7 +312,7 @@ class PartialSignVector(SageObject):
             [0, 1, 3, 4]
         """
         return list(self._negative_support)
-    
+
     def zero_support(self) -> list[int]:
         r"""
         Return a list of indices where the partial sign vector can be zero.
@@ -350,7 +342,7 @@ class PartialSignVector(SageObject):
             [2, 3, 4]
         """
         return list(self._positive_support)
-    
+
     def cardinality(self) -> int:
         r"""
         Return the number of sign vectors packed in the partial sign vector .
@@ -366,24 +358,23 @@ class PartialSignVector(SageObject):
             sage: len(X.unpack())
             12
         """
-        return 2**(len(self) - len(self.determined_support()) - len(self.undetermined_support())) * 3**(len(self.undetermined_support()))
-        
-    
+        return 2 ** (len(self) - len(self.determined_support()) - len(self.undetermined_support())) * 3 ** (len(self.undetermined_support()))
+
     def _determined_negative_support(self) -> FrozenBitset:
         return self._negative_support - (self._positive_support | self._zero_support)
-    
+
     def _determined_zero_support(self) -> FrozenBitset:
         return self._zero_support - (self._negative_support | self._positive_support)
-    
+
     def _determined_positive_support(self) -> FrozenBitset:
         return self._positive_support - (self._negative_support | self._zero_support)
-    
+
     def _determined_support(self) -> FrozenBitset:
-        return self._determined_negative_support() | self._determined_zero_support() | self._determined_positive_support() 
-    
+        return self._determined_negative_support() | self._determined_zero_support() | self._determined_positive_support()
+
     def _undetermined_support(self) -> FrozenBitset:
         return self._positive_support & self._negative_support & self._zero_support
-    
+
     def determined_negative_support(self) -> list[int]:
         r"""
         Return a list of indices where the partial sign vector is negative.
@@ -398,7 +389,7 @@ class PartialSignVector(SageObject):
             [0]
         """
         return list(self._determined_negative_support())
-    
+
     def determined_zero_support(self) -> list[int]:
         r"""
         Return a list of indices where the partial sign vector is zero.
@@ -413,7 +404,7 @@ class PartialSignVector(SageObject):
             [3]
         """
         return list(self._determined_zero_support())
-    
+
     def determined_positive_support(self) -> list[int]:
         r"""
         Return a list of indices where the partial sign vector is positive.
@@ -428,7 +419,7 @@ class PartialSignVector(SageObject):
             [2]
         """
         return list(self._determined_positive_support())
-    
+
     def determined_support(self) -> list[int]:
         r"""
         Return a list of indices where the partial sign vector is determined.
@@ -443,7 +434,7 @@ class PartialSignVector(SageObject):
             [0, 2, 3]
         """
         return list(self._determined_support())
-    
+
     def undetermined_support(self) -> list[int]:
         r"""
         Return a list of indices where the partial sign vector is undetermined.
@@ -458,7 +449,6 @@ class PartialSignVector(SageObject):
             [3]
         """
         return list(self._undetermined_support())
-
 
     def list_from_positions(self, positions: list[int]) -> list[int]:
         r"""
@@ -566,7 +556,6 @@ class PartialSignVector(SageObject):
 
             return self.__class__(negative_support, zero_support, positive_support)
 
-    
     def delete_components(self, indices: list[int]) -> PartialSignVector:
         r"""
         Delete the given components from the partial sign vector.
@@ -602,7 +591,7 @@ class PartialSignVector(SageObject):
         if type(other) is SignVector:
             other = ExtendedSignVector.from_sign_vector(other)
         return (self._determined_positive_support() & other._determined_negative_support()) | (self._determined_negative_support()  & other._determined_positive_support())
-        
+
     def connecting_elements(self, other: SignVector | PartialSignVector) -> list[int]:
         r"""
         Compute the list of connecting elements of two (partial) sign vectors.
@@ -627,7 +616,7 @@ class PartialSignVector(SageObject):
             [0, 2]
         """
         return list(self._connecting_elements(other))
-    
+
     def separating_elements(self, other: SignVector | PartialSignVector) -> list[int]:
         r"""
         Compute the list of separating elements of two (partial) sign vectors.
@@ -651,7 +640,7 @@ class PartialSignVector(SageObject):
             sage: X.separating_elements(Y)
             [2, 4]
         """
-        return list(self._separating_elements(other))  
+        return list(self._separating_elements(other))
 
     def compose(self, other: SignVector | PartialSignVector) -> PartialSignVector:
         r"""
@@ -686,9 +675,8 @@ class PartialSignVector(SageObject):
         return self.__class__(
             self._negative_support | (other._negative_support & self._zero_support),
             self._zero_support & other._zero_support,
-            self._positive_support | (other._positive_support & self._zero_support)    
+            self._positive_support | (other._positive_support & self._zero_support)
         )
-
 
     def is_orthogonal_to(self, other: SignVector | PartialSignVector) -> bool:
         r"""
@@ -717,16 +705,13 @@ class PartialSignVector(SageObject):
             sage: X.is_orthogonal_to(partial_sign_vector("0*++0"))
             False
         """
-        
-        if type(other) is SignVector:
+        if isinstance(other, SignVector):
             other = ExtendedSignVector.from_sign_vector(other)
 
         if (~(self._determined_zero_support() | other._determined_zero_support())).isempty():
-            return True  
-        
+            return True
+
         return not(self._separating_elements(other).isempty() or self._connecting_elements(other).isempty())
-
-
 
     def issubset(self, other: PartialSignVector) -> bool:
         r"""
@@ -789,20 +774,14 @@ class PartialSignVector(SageObject):
             sage: Y = partial_sign_vector("+++")
             sage: X.intersection(Y) is None
             True
-
         """
-
         n_support = self._negative_support & other._negative_support
         z_support = self._zero_support & other._zero_support
         p_support = self._positive_support & other._positive_support
 
         empty_support = ~(n_support | z_support | p_support)
         if empty_support.isempty():
-            return self.__class__(
-                n_support,
-                z_support,
-                p_support
-            )
+            return self.__class__(n_support, z_support, p_support)
         return None
 
     def intersection(self, other: PartialSignVector|set[PartialSignVector]) -> PartialSignVector|NoneType:
@@ -831,14 +810,14 @@ class PartialSignVector(SageObject):
         """
         if isinstance(other, PartialSignVector):
             return self._intersection(other)
-        
+
         inter = self
         for o in other:
             inter = inter._intersection(o)
             if inter is None:
                 return None
         return inter
-    
+
     def _setminus(self, other: PartialSignVector) -> set[PartialSignVector]:
         r"""
         Return the set difference of two partial sign vectors.
@@ -869,14 +848,13 @@ class PartialSignVector(SageObject):
             {(+****), (*n***), (****n), (**/**), (***p*)}
             sage: Z.setminus(Y)
             {(**/**), (***p*), (p****), (****n)}
-
         """
         inter = self.intersection(other)
         if inter is None:
             return {self}
         if inter == self:
             return set()
-        
+
         n_minus = self._negative_support - inter._negative_support
         z_minus = self._zero_support - inter._zero_support
         p_minus = self._positive_support - inter._positive_support
@@ -886,15 +864,15 @@ class PartialSignVector(SageObject):
         res = set()
         length = self.length()
         for i in minus_support:
-           index = FrozenBitset([i], capacity=length)
+            index = FrozenBitset([i], capacity=length)
 
-           n_support = self._negative_support - index if i not in n_minus else self._negative_support
-           z_support = self._zero_support - index if i not in z_minus else self._zero_support
-           p_support = self._positive_support - index if i not in p_minus else self._positive_support
-           res.add(self.__class__(n_support, z_support, p_support))
+            n_support = self._negative_support - index if i not in n_minus else self._negative_support
+            z_support = self._zero_support - index if i not in z_minus else self._zero_support
+            p_support = self._positive_support - index if i not in p_minus else self._positive_support
+            res.add(self.__class__(n_support, z_support, p_support))
 
         return res
-    
+
     def setminus(self, other: PartialSignVector|set[PartialSignVector]) -> set[PartialSignVector]:
         r"""
         Return the set difference of two or more partial sign vectors.
@@ -923,11 +901,10 @@ class PartialSignVector(SageObject):
             set()
             sage: Z.setminus({X,Y})
             {(+****), (pn***), (p**p*), (p***n), (p*/**), (**/**), (***p*), (****n)}
-
         """
         if isinstance(other, PartialSignVector):
             return self._setminus(other)
-        
+
         res = {self}
         for o in other:
             new_res = set()
@@ -935,7 +912,7 @@ class PartialSignVector(SageObject):
                 new_res = new_res.union(r._setminus(o))
             res = new_res
         return  res
-    
+
     def union(self, other: PartialSignVector) -> set[PartialSignVector]:
         r"""
         Return the disjoint union of two partial sign vectors.
@@ -959,7 +936,6 @@ class PartialSignVector(SageObject):
             (-*0-+)
             sage: X.union(Y)
             {(-n0-+), (n+0-+)}
-            
         """
         if self.issubset(other):
             return {other}
@@ -967,7 +943,7 @@ class PartialSignVector(SageObject):
             return {self}
 
         return {self}.union(other.setminus(self))
-    
+
     def complement(self) -> set[PartialSignVector]:
         r"""
         Return the complement of this partial sign vector.
@@ -1071,7 +1047,6 @@ class PartialSignVector(SageObject):
             (-p**+)
             sage: X < Y
             True
-
 
         We can also use ``<`` to compare a sign vector with ``0``::
 
@@ -1178,7 +1153,7 @@ class PartialSignVector(SageObject):
     def is_vector(self) -> bool:
         r"""Return ``False`` since sign vectors are not vectors."""
         return False
-    
+
     def is_sign_vector(self) -> bool:
         r"""
         Return if the partial sign vector is a sign vector.
@@ -1198,15 +1173,16 @@ class PartialSignVector(SageObject):
             True
         """
         return len(self) == len(self.determined_support())
-    
-    def to_sign_vector(self, extended=True) -> bool:
+
+    def to_sign_vector(self, extended=False) -> bool:
+        r"""Convert this partial sign vector to a sign vector."""
         if self.is_sign_vector():
             if extended:
                 return ExtendedSignVector(self._positive_support, self._negative_support)
             return SignVector(self._positive_support, self._negative_support)
-        return Exception("not a sign vector")
-    
-    def unpack(self, indices=None) -> set[SignVector] | set[PartialSignVector]:
+        raise TypeError("not a sign vector")
+
+    def unpack(self, indices: list[int] = None) -> set[SignVector] | set[PartialSignVector]:
         r"""
         Return the partial sign vector as a set of (partial) sign vectors, where the given indices are determined.
 
@@ -1224,26 +1200,22 @@ class PartialSignVector(SageObject):
             sage: X = partial_sign_vector("p*0")
             sage: X
             (p*0)
-            sage: X.unpack(0)
+            sage: X.unpack([0])
             {(+*0), (0*0)}
-            sage: X.unpack([1,2])
+            sage: X.unpack([1, 2])
             {(p00), (p+0), (p-0)}
             sage: X.unpack()
             {(000), (+-0), (0+0), (++0), (0-0), (+00)}
         """
-
         #TODO: parallelizing
         cast_sv = False
         res = set()
         res.add(self)
         temp = set()
-        
+
         if indices is None:
             indices = range(len(self))
             cast_sv = True
-
-        if isinstance(indices, int) or  isinstance(indices, Integer):
-            indices = [indices]
 
         for e in indices:
             for psv in res:
@@ -1251,12 +1223,12 @@ class PartialSignVector(SageObject):
                     temp.add(psv.set_sign([e],[s]))
             res = temp
             temp = set()
-        
+
         if cast_sv:
             return set(sv.to_sign_vector() for sv in res)
-        
+
         return res
-    
+
     def lower_closure(self) -> PartialSignVector:
         r"""
         Return the lower closure of the partial sign vector.
@@ -1267,12 +1239,11 @@ class PartialSignVector(SageObject):
             sage: X = partial_sign_vector("pn+-*/")
             sage: X.lower_closure()
             (pnpn**)
-
         """
         return self.__class__(self._negative_support,
-                               ~ FrozenBitset([], capacity=self.length()),
+                               ~FrozenBitset([], capacity=self.length()),
                                self._positive_support)
-    
+
     def upper_closure(self) -> PartialSignVector:
         r"""
         Return the upper closure of the partial sign vector.
@@ -1283,12 +1254,11 @@ class PartialSignVector(SageObject):
             sage: X = partial_sign_vector("pn+-*/")
             sage: X.upper_closure()
             (**+-*/)
-
         """
         return self.__class__(self._negative_support | self._zero_support,
                                self._zero_support,
                                self._positive_support | self._zero_support)
-    
+
     def closure(self) -> PartialSignVector:
        r"""
         Return the closure of the partial sign vector.
@@ -1299,12 +1269,11 @@ class PartialSignVector(SageObject):
             sage: X = partial_sign_vector("pn+-*/")
             sage: X.closure()
             (**pn**)
-
         """
        return self.__class__(self._negative_support | self._zero_support,
-                               ~ FrozenBitset([], capacity=self.length()),
-                               self._positive_support | self._zero_support) 
-        
+                               ~FrozenBitset([], capacity=self.length()),
+                               self._positive_support | self._zero_support)
+
     def __hash__(self) -> int:
         r"""Return the hash value of this partial sign vector."""
 
@@ -1321,8 +1290,8 @@ class PartialSignVector(SageObject):
             sage: PartialSignVector.zero(5)
             (00000)
         """
-        return cls(FrozenBitset([], capacity=length), ~ FrozenBitset([], capacity=length), FrozenBitset([], capacity=length))
-    
+        return cls(FrozenBitset([], capacity=length), ~FrozenBitset([], capacity=length), FrozenBitset([], capacity=length))
+
     @classmethod
     def star(cls, length: int) -> PartialSignVector:
         r"""
@@ -1334,7 +1303,7 @@ class PartialSignVector(SageObject):
             sage: PartialSignVector.star(5)
             (*****)
         """
-        return cls(~ FrozenBitset([], capacity=length), ~ FrozenBitset([], capacity=length), ~ FrozenBitset([], capacity=length))
+        return cls(~FrozenBitset([], capacity=length), ~FrozenBitset([], capacity=length), ~FrozenBitset([], capacity=length))
 
     @classmethod
     def from_string(cls, s: str) -> PartialSignVector:
@@ -1406,7 +1375,7 @@ class PartialSignVector(SageObject):
             (+-*0-p)
         """
         return cls(FrozenBitset(negative_support, capacity=length), FrozenBitset(zero_support, capacity=length), FrozenBitset(positive_support, capacity=length))
-    
+
     @classmethod
     def from_sign_vector(cls, sv: SignVector) -> PartialSignVector:
         r"""
@@ -1432,15 +1401,15 @@ class PartialSignVector(SageObject):
             (0+-0+0)
         """
         return cls(sv._negative_support, sv._zero_support, sv._positive_support)
-    
-class  ExtendedSignVector(SignVector):
 
+class  ExtendedSignVector(SignVector):
+    """Utility class for sign vectors with extra functionality."""
     def __init__(self, positive_support: FrozenBitset, negative_support: FrozenBitset) -> None:
         super().__init__(positive_support, negative_support)
 
     def _determined_positive_support(self) -> FrozenBitset:
         return self._positive_support
-    
+
     def _determined_negative_support(self) -> FrozenBitset:
         return self._negative_support
 
@@ -1454,12 +1423,11 @@ class  ExtendedSignVector(SignVector):
             sage: X = ExtendedSignVector.from_sign_vector(sign_vector("+-00+-"))
             sage: X.lower_closure()
             (pn00pn)
-
         """
         return PartialSignVector(self._negative_support,
-                               ~ FrozenBitset([], capacity=self.length()),
+                               ~FrozenBitset([], capacity=self.length()),
                                self._positive_support)
-    
+
     def upper_closure(self) -> PartialSignVector:
         r"""
         Return the upper closure of the sign vector.
@@ -1470,13 +1438,11 @@ class  ExtendedSignVector(SignVector):
             sage: X = ExtendedSignVector.from_sign_vector(sign_vector("+-00+-"))
             sage: X.upper_closure()
             (+-**+-)
-
         """
-
         return PartialSignVector(self._negative_support | self._zero_support,
                                self._zero_support,
                                self._positive_support | self._zero_support)
-    
+
     def closure(self) -> PartialSignVector:
        r"""
         Return the closure of the sign vector.
@@ -1487,12 +1453,11 @@ class  ExtendedSignVector(SignVector):
             sage: X = ExtendedSignVector.from_sign_vector(sign_vector("+-00+-"))
             sage: X.closure()
             (pn**pn)
-
         """
        return PartialSignVector(self._negative_support | self._zero_support,
-                               ~ FrozenBitset([], capacity=self.length()),
-                               self._positive_support | self._zero_support) 
-    
+                               ~FrozenBitset([], capacity=self.length()),
+                               self._positive_support | self._zero_support)
+
     def orthogonal_complement(self, other=None) -> list[PartialSignVector]:
         r"""
         Compute the orthogonal complepent of the sign vector in a partial sign vector. If no argument is given,
@@ -1535,7 +1500,6 @@ class  ExtendedSignVector(SignVector):
             sage: X.orthogonal_complement(Y)
             [(-+-+-)]
         """
-
         if other is None:
             other = PartialSignVector.star(self.length())
         res = []
@@ -1543,26 +1507,75 @@ class  ExtendedSignVector(SignVector):
             res.append(PartialSignVector(other._negative_support - self._support(),
                                          other._zero_support,
                                          other._positive_support - self._support()))
-            
+
             for c, d in permutations(list(self._support() & other._undetermined_support()), 2):
                 Z = other.set_sign([c],[self[c]])
                 Z = Z.set_sign([d],[-self[d]])
                 res.append(Z)
 
-        elif not( other._connecting_elements(self).isempty() or other._separating_elements(self).isempty()):
+        elif not (other._connecting_elements(self).isempty() or other._separating_elements(self).isempty()):
             return [other]
-        
+
         elif not other._connecting_elements(self).isempty():
             for d in list(self._support() & other._undetermined_support()):
                 res.append(other.set_sign([d],[-self[d]]))
-        
+
         elif not other._separating_elements(self).isempty():
             for c in list(self._support() & other._undetermined_support()):
                 res.append(other.set_sign([c],[self[c]]))
 
         return res
-    
+
     @classmethod
     def from_sign_vector(cls, sign_vector: SignVector) -> ExtendedSignVector:
         """Create an extended sign vector from a sign vector."""
         return cls(sign_vector._positive_support, sign_vector._negative_support)
+
+
+def prune(iterable: set[PartialSignVector]) -> set[PartialSignVector]:
+    r"""
+    Remove all partial sign vectors that are subsets of other partial sign vectors in the iterable.
+
+    INPUT:
+
+    - ``iterable`` -- an iterable of partial sign vectors
+
+    OUTPUT:
+    Return a pruned set of partial sign vectors.
+
+    EXAMPLES::
+
+        sage: from sign_vectors.partial_sign_vectors import *
+        sage: W = [partial_sign_vector("+**"), partial_sign_vector("-*+"), partial_sign_vector("-++"), partial_sign_vector("+-*")]
+        sage: W
+        [(+**), (-*+), (-++), (+-*)]
+        sage: prune(W)
+        {(-*+), (+**)}
+        sage: prune([partial_sign_vector("000")])
+        set()
+    """
+    if not iterable:
+        return set()
+
+    max_cardinality_length = 1
+    same_cardinality_list = [set()]
+
+    for x in iterable:
+        while x.cardinality() >= max_cardinality_length:
+            same_cardinality_list.append(set())
+            max_cardinality_length += 1
+
+        same_cardinality_list[x.cardinality() - 1].add(x)
+    res = set()
+
+    for i in range(max_cardinality_length - 1, 0, -1):
+        for x in same_cardinality_list[i]:
+            subset_flag = False
+            for y in res:
+                if x.issubset(y):
+                    subset_flag = True
+                    break
+            if not subset_flag:
+                res.add(x)
+
+    return res

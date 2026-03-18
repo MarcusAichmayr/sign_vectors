@@ -16,7 +16,8 @@ Functions for sets of sign vectors
 
 from sage.combinat.posets.posets import Poset
 
-from . import SignVector, zero_sign_vector, PartialSignVector, ExtendedSignVector
+from .partial_sign_vectors import PartialSignVector, ExtendedSignVector, prune
+from . import SignVector, zero_sign_vector
 
 
 def lower_closure(iterable: set[SignVector]) -> set[SignVector]:
@@ -86,6 +87,7 @@ def lower_closure(iterable: set[SignVector]) -> set[SignVector]:
 
     return set().union(*same_support_list)
 
+
 def upper_closure(iterable: set[SignVector]) -> set[SignVector]:
     r"""
     Compute the upper closure of given sign vectors.
@@ -154,7 +156,58 @@ def upper_closure(iterable: set[SignVector]) -> set[SignVector]:
 
     return set().union(*same_support_list)
 
-def orthogonal_complement(iterable: set[SignVector]) -> set[PartialSignVector]:
+
+def _orthogonal_complement(iterable: set[SignVector]) -> set[PartialSignVector]:
+    r"""
+    Compute the orthogonal complement of given sign vectors.
+    INPUT:
+
+    - ``iterable`` -- an iterable of sign vectors
+
+    OUTPUT:
+    Return the orthogonal complement of ``iterable`` as a set of partial sign vectors.
+
+    EXAMPLES:
+
+    We consider a list consisting of only one sign vector::
+
+        sage: from sign_vectors import *
+        sage: from sign_vectors.functions import _orthogonal_complement
+        sage: W = ExtendedSignVector.from_sign_vector(sign_vector("+-0"))
+        sage: W
+        (+-0)
+        sage: _orthogonal_complement([W])
+        {(00*), (++*), (--*)}
+        sage: W.orthogonal_complement()
+        [(00*), (++*), (--*)]
+
+    Now, we consider a list of three sign vectors::
+
+        sage: W = [sign_vector("++-"), sign_vector("-00"), sign_vector("0--")]
+        sage: W
+        [(++-), (-00), (0--)]
+        sage: _orthogonal_complement(W)
+        {(000)}
+        sage: W = [sign_vector("++-0"), sign_vector("+++0"), sign_vector("++00")]
+        sage: W
+        [(++-0), (+++0), (++00)]
+        sage: _orthogonal_complement(W)
+        {(-+**), (+-**), (000*)}
+    """
+    iterable = [ExtendedSignVector.from_sign_vector(X) for X in iterable]
+    res = set(iterable.pop().orthogonal_complement())
+    temp = set()
+
+    for X in iterable:
+        for Y in res:
+            temp.update(X.orthogonal_complement(Y))
+        res = temp.copy()
+        temp = set()
+
+    return res
+
+
+def orthogonal_complement(iterable: set[SignVector]) -> set[SignVector]:
     r"""
     Compute the orthogonal complement of given sign vectors.
     INPUT:
@@ -173,9 +226,7 @@ def orthogonal_complement(iterable: set[SignVector]) -> set[PartialSignVector]:
         sage: W
         (+-0)
         sage: orthogonal_complement([W])
-        {(00*), (++*), (--*)}
-        sage: W.orthogonal_complement()
-        [(00*), (++*), (--*)]
+        {(000), (---), (00+), (00-), (++0), (++-), (--0), (--+), (+++)}
 
     Now, we consider a list of three sign vectors::
 
@@ -188,20 +239,30 @@ def orthogonal_complement(iterable: set[SignVector]) -> set[PartialSignVector]:
         sage: W
         [(++-0), (+++0), (++00)]
         sage: orthogonal_complement(W)
-        {(-+**), (+-**), (000*)}
+        {(0000),
+         (-+-+),
+         (+-00),
+         (-+00),
+         (-++0),
+         (000+),
+         (-+++),
+         (000-),
+         (+---),
+         (+-0+),
+         (-+--),
+         (+-+0),
+         (+-+-),
+         (+-++),
+         (+--0),
+         (-+-0),
+         (+--+),
+         (-+0+),
+         (-+0-),
+         (+-0-),
+         (-++-)}
     """
-    iterable = [ExtendedSignVector.from_sign_vector(X) for X in iterable]
-    res = set(iterable.pop().orthogonal_complement())
-    temp = set()
-    
+    return set.union(*(psv.unpack() for psv in _orthogonal_complement(iterable)))
 
-    for X in iterable:
-        for Y in res:
-            temp.update(X.orthogonal_complement(Y))
-        res = temp.copy()
-        temp = set()
-
-    return res
 
 def contraction(iterable: set[SignVector], indices: list[int]) -> set[SignVector]:
     r"""
@@ -287,51 +348,3 @@ def plot_sign_vectors(iterable: set[SignVector], vertex_size: int = 600, figsize
         element_color="white",
         vertex_shape="",
     ).show(figsize=figsize, aspect_ratio=aspect_ratio)
-
-def prune(iterable: set[PartialSignVector]) -> set[PartialSignVector]:
-    r"""
-    Remove all partial sign vectors that are subsets of other partial sign vectors in the iterable.
-
-    INPUT:
-
-    - ``iterable`` -- an iterable of partial sign vectors
-
-    OUTPUT:
-    Return a pruned set of partial sign vectors.
-
-    EXAMPLES::
-
-        sage: from sign_vectors import *
-        sage: W = [partial_sign_vector("+**"), partial_sign_vector("-*+"), partial_sign_vector("-++"), partial_sign_vector("+-*")]
-        sage: W
-        [(+**), (-*+), (-++), (+-*)]
-        sage: prune(W)
-        {(-*+), (+**)}
-
-    """
-    if not iterable:
-        return set()
-
-    max_cardinality_length = 1
-    same_cardinality_list = [set()]
-
-    for x in iterable:
-        while x.cardinality() >= max_cardinality_length:
-            same_cardinality_list.append(set())
-            max_cardinality_length += 1
-
-        same_cardinality_list[x.cardinality()-1].add(x)
-    res = set()
-
-    for i in range(max_cardinality_length-1, 0, -1):
-        for x in same_cardinality_list[i]:
-            subset_flag = False
-            for y in res:
-                if x.issubset(y):
-                    subset_flag = True
-                    break
-            if not subset_flag:
-                res.add(x)
-
-    return res
-
