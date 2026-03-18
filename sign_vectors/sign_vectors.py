@@ -62,6 +62,7 @@ The conformal relation is a partial order on a set of sign vectors::
 #############################################################################
 #  Copyright (C) 2025                                                       #
 #          Marcus S. Aichmayr (aichmayr@mathematik.uni-kassel.de)           #
+#          Arne Jenß (arne.jenss@uni-kassel.de)                             #
 #                                                                           #
 #  Distributed under the terms of the GNU General Public License (GPL)      #
 #  either version 3, or (at your option) any later version                  #
@@ -364,7 +365,7 @@ class SignVector(SageObject):
             [1, 4]
         """
         return list(~self._support())
-    
+
     @property
     def _zero_support(self) -> FrozenBitset:
         return ~self._support()
@@ -1107,7 +1108,7 @@ class SignVector(SageObject):
         r"""Return the hash value of this sign vector."""
 
         return hash((self._positive_support, self._negative_support))
-         
+
     @classmethod
     def zero(cls, length: int) -> SignVector:
         r"""
