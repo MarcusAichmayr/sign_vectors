@@ -4,7 +4,7 @@ Utility functions
 """
 
 #############################################################################
-#  Copyright (C) 2025                                                       #
+#  Copyright (C) 2026                                                       #
 #          Marcus S. Aichmayr (aichmayr@mathematik.uni-kassel.de)           #
 #                                                                           #
 #  Distributed under the terms of the GNU General Public License (GPL)      #

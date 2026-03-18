@@ -60,7 +60,7 @@ The conformal relation is a partial order on a set of sign vectors::
 """
 
 #############################################################################
-#  Copyright (C) 2025                                                       #
+#  Copyright (C) 2026                                                       #
 #          Marcus S. Aichmayr (aichmayr@mathematik.uni-kassel.de)           #
 #          Arne Jenß (arne.jenss@uni-kassel.de)                             #
 #                                                                           #

@@ -24,7 +24,7 @@ import sage.all
 # -- Project information -----------------------------------------------------
 
 project = u'sign_vectors'
-copyright = u'2025, Marcus S. Aichmayr'
+copyright = u'2026, Marcus S. Aichmayr'
 author = u'Marcus S. Aichmayr'
 
 # The short X.Y version

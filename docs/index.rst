@@ -1,5 +1,5 @@
-Documentation of sign_vectors
-=============================
+Sign vectors
+============
 
 To install this SageMath package, visit the `repository on GitHub <https://github.com/MarcusAichmayr/sign_vectors>`_.
 
