@@ -77,7 +77,7 @@ The issubset function is a partial order on a set of partial sign vectors::
 """
 
 #############################################################################
-#  Copyright (C) 2025                                                       #
+#  Copyright (C) 2026                                                       #
 #          Marcus S. Aichmayr (aichmayr@mathematik.uni-kassel.de)           #
 #          Arne Jenß (arne.jenss@uni-kassel.de)                             #
 #                                                                           #
