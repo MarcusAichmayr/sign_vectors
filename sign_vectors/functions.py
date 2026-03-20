@@ -16,7 +16,7 @@ Functions for sets of sign vectors
 
 from sage.combinat.posets.posets import Poset
 
-from .partial_sign_vectors import PartialSignVector, ExtendedSignVector, prune
+from .partial_sign_vectors import PartialSignVector, ExtendedSignVector
 from . import SignVector, zero_sign_vector
 
 
