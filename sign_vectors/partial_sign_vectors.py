@@ -1,6 +1,6 @@
 r"""
-Partial sign vectors
-====================
+Auxiliary class for functions
+=============================
 
 There are several ways to define partial sign vectors::
 
@@ -958,9 +958,11 @@ class PartialSignVector(SageObject):
             sage: X = partial_sign_vector("n*0-+")
             sage: X
             (n*0-+)
-            sage: C = X.complement(); C
+            sage: C = X.complement()
+            sage: C
             {(**/**), (+****), (***p*), (****n)}
-            sage: CC = set().union(*(c.complement() for c in C)); CC
+            sage: CC = set().union(*(c.complement() for c in C))
+            sage: CC
             {(****+), (***-*), (n****), (**0**)}
         """
         return PartialSignVector.star(self.length()).setminus(self)
@@ -1458,21 +1460,22 @@ class  ExtendedSignVector(SignVector):
                                ~FrozenBitset([], capacity=self.length()),
                                self._positive_support | self._zero_support)
 
-    def orthogonal_complement(self, other=None) -> list[PartialSignVector]:
+    def orthogonal_complement(self, other: PartialSignVector = None) -> list[PartialSignVector]:
         r"""
-        Compute the orthogonal complepent of the sign vector in a partial sign vector. If no argument is given,
-        the complete orthogonal complement of the sign vector is given.
+        Compute the orthogonal complement of the sign vector in a partial sign vector.
+
+        If no argument is given, the complete orthogonal complement of the sign vector is returned.
 
         INPUT:
 
-        - ``other`` -- partial sign vector or None
+        - ``other`` -- partial sign vector (optional)
 
         OUTPUT:
         List of partial sign vectors.
 
         .. NOTE::
 
-            The partial sign vector ``other`` should only contain th signs -, 0, + and *.
+            The partial sign vector ``other`` should only contain the signs ``-``, ``0``, ``+`` and ``*``.
             For efficiency, this is not checked.
 
         EXAMPLES::
