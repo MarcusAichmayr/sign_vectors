@@ -36,8 +36,8 @@ def are_parallel(iterable, component1, component2, return_ratio: bool = False):
 
     .. NOTE::
 
-        The elements ``component1`` and ``component2`` are parallel if there exists a ratio ``d`` such that
-        ``v[component1] = d v[component2]`` for each ``v`` in ``iterable``.
+        Two components :math:`i` and :math:`j` are parallel if there exists a ratio :math:`d` such that
+        :math:`v[i] = d v[j]` for each :math:`v` in ``iterable``.
 
     EXAMPLES::
 
