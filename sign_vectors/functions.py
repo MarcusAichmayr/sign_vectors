@@ -286,8 +286,7 @@ def contraction(iterable: set[SignVector], indices: list[int]) -> set[SignVector
         sage: W
         [(++0), (-00), (00+)]
 
-    Only the third sign vector has a zero at the component with index ``0``.
-    Removing this component leads to the following result::
+    We consider the contraction for different indices::
 
         sage: contraction(W, [0])
         {(0+)}
