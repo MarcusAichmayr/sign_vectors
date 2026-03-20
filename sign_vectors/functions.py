@@ -39,7 +39,7 @@ def lower_closure(iterable: set[SignVector]) -> set[SignVector]:
 
     EXAMPLES:
 
-    We consider a list consisting of only one sign vector::
+    First, we consider a list consisting of only one sign vector::
 
         sage: from sign_vectors import *
         sage: W = [sign_vector("+-0")]
@@ -107,7 +107,7 @@ def upper_closure(iterable: set[SignVector]) -> set[SignVector]:
 
     EXAMPLES:
 
-    We consider a list consisting of only one sign vector::
+    First, we consider a list consisting of only one sign vector::
 
         sage: from sign_vectors import *
         sage: W = [sign_vector("+-0")]
@@ -155,6 +155,67 @@ def upper_closure(iterable: set[SignVector]) -> set[SignVector]:
                 same_support_list[i - 1].add(sv.set_to_minus([s]))
 
     return set().union(*same_support_list)
+
+
+def total_closure(iterable: set[SignVector]) -> set[SignVector]:
+    r"""
+    Compute the total closure of given sign vectors.
+
+    INPUT:
+
+    - ``iterable`` -- an iterable of sign vectors
+
+    OUTPUT:
+    Return the total closure of ``iterable`` as a set of sign vectors.
+
+    .. NOTE::
+
+        The total closure is the union of the lower and upper closure.
+
+    .. SEEALSO::
+
+        - :func:`lower_closure`
+        - :func:`upper_closure`
+
+    EXAMPLES:
+
+    First, we consider a list consisting of only one sign vector::
+
+        sage: from sign_vectors import *
+        sage: W = [sign_vector("+-0")]
+        sage: W
+        [(+-0)]
+        sage: total_closure(W)
+        {(000), (0-0), (+00), (+-0), (+--), (+-+)}
+
+    Now, we consider a list of three sign vectors::
+
+        sage: W = [sign_vector("++-"), sign_vector("-00"), sign_vector("0--")]
+        sage: W
+        [(++-), (-00), (0--)]
+        sage: total_closure(W)
+        {(000),
+         (-00),
+         (00-),
+         (---),
+         (0+-),
+         (++-),
+         (-+0),
+         (0-0),
+         (--+),
+         (-++),
+         (-0-),
+         (+00),
+         (+--),
+         (-+-),
+         (-0+),
+         (--0),
+         (0+0),
+         (+0-),
+         (++0),
+         (0--)}
+    """
+    return lower_closure(iterable).union(upper_closure(iterable))
 
 
 def _orthogonal_complement(iterable: set[SignVector]) -> set[PartialSignVector]:
