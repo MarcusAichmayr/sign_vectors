@@ -1028,6 +1028,7 @@ class _OrientedMatroidFromCocircuits(_OrientedMatroid):
         def is_entry_zero_from_cocircuits(zero_supports: set[SignVector], rset: tuple[int]) -> bool:
             return any(zero_support.issuperset(rset) for zero_support in zero_supports)
 
+        # TODO don't consider loops
         zero_supports = {frozenset(cocircuit.zero_support()) for cocircuit in self.cocircuits()}
         for candidate in range(self.ground_set_size + 1):
             if not all(is_entry_zero_from_cocircuits(zero_supports, rset) for rset in Combinations(self.ground_set_size, candidate)):
@@ -1076,9 +1077,10 @@ class _OrientedMatroidFromCircuits(_OrientedMatroid):
         def is_entry_zero(rset: tuple[int]) -> bool:
             return any(support.issubset(rset) for support in self._circuit_supports)
 
-        for candidate in range(self.ground_set_size - len(self.loops()), -1, -1):
-            if not all(is_entry_zero(rset) for rset in Combinations(self.ground_set_size, candidate)):
-                self._rank = candidate
+        no_loop_entries = set(range(self.ground_set_size)) - self.loops()
+        for subset_size in range(len(no_loop_entries), -1, -1):
+            if not all(is_entry_zero(rset) for rset in Combinations(no_loop_entries, subset_size)):
+                self._rank = subset_size
                 return
 
     def _compute_loops(self) -> None:
