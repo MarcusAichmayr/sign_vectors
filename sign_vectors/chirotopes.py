@@ -109,8 +109,8 @@ class Chirotope:
 
     We construct chirotopes from matrices::
 
-        sage: M = matrix([[1, 2, 0, 0], [0, 1, 2, 3]])
-        sage: c = Chirotope.from_matrix(M)
+        sage: P = matrix([[1, 2, 0, 0], [0, 1, 2, 3]])
+        sage: c = Chirotope.from_matrix(P)
         sage: c.entry((0, 1))
         +
         sage: c.entries()
@@ -122,8 +122,8 @@ class Chirotope:
 
     ::
 
-        sage: M = matrix([[1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 1]])
-        sage: c = Chirotope.from_matrix(M)
+        sage: P = matrix([[1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 1]])
+        sage: c = Chirotope.from_matrix(P)
         sage: c
         Chirotope of rank 3 on ground set of size 4
         sage: c.entries()
@@ -285,15 +285,15 @@ class _ChirotopeFromMatrix(Chirotope):
     TESTS::
 
         sage: from sign_vectors.chirotopes import Chirotope
-        sage: M = matrix(ZZ, 0, 3)
-        sage: c = Chirotope.from_matrix(M)
+        sage: P = matrix(ZZ, 0, 3)
+        sage: c = Chirotope.from_matrix(P)
         sage: c.entries()
         [+]
 
     ::
 
-        sage: M = zero_matrix(ZZ, 1, 2)
-        sage: c = Chirotope.from_matrix(M)
+        sage: P = zero_matrix(ZZ, 1, 2)
+        sage: c = Chirotope.from_matrix(P)
         sage: c.entries()
         [0, 0]
         sage: c.dual().entries()
@@ -429,8 +429,8 @@ class _ChirotopeFromCircuits(_ChirotopeFromMinimalSupportElements):
 
         sage: from sign_vectors import *
         sage: from sign_vectors.chirotopes import Chirotope
-        sage: M = matrix.ones(1, 9)
-        sage: om = OrientedMatroid(M)
+        sage: P = matrix.ones(1, 9)
+        sage: om = OrientedMatroid(P)
         sage: Chirotope.from_circuits(om.circuits(), 1, 9).entries()
         [+, +, +, +, +, +, +, +, +]
     """
