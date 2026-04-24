@@ -1154,21 +1154,24 @@ class OrientedMatroid(_OrientedMatroidFromMatrix):
     One natural approach is to use a matrix::
 
         sage: from sign_vectors import *
-        sage: P = matrix([[1, 1, 0, 0], [0, 1, 1, -1]])
+        sage: P = matrix([[1, 2, 0, 0, 0], [0, 1, 2, -3, 0]])
+        sage: P
+        [ 1  2  0  0  0]
+        [ 0  1  2 -3  0]
         sage: om = OrientedMatroid(P)
         sage: om
-        Oriented matroid of dimension 1 with elements of size 4.
+        Oriented matroid of dimension 1 with elements of size 5.
         sage: om.ground_set
-        {0, 1, 2, 3}
+        {0, 1, 2, 3, 4}
         sage: om.rank
         2
 
     We compute the chirotope::
 
         sage: om.chirotope()
-        [+, +, -, +, -, 0]
+        [+, +, -, 0, +, -, 0, 0, 0, 0]
         sage: om.chirotope_as_string()
-        '++-+-0'
+        '++-0+-0000'
 
     Next, we count the number of faces::
 
@@ -1180,18 +1183,18 @@ class OrientedMatroid(_OrientedMatroidFromMatrix):
     We compute the faces explicitly::
 
         sage: om.cocircuits()
-        {(-0+-), (0++-), (--00), (++00), (0--+), (+0-+)}
+        {(-0+-0), (0++-0), (--000), (++000), (0--+0), (+0-+0)}
         sage: om.topes()
-        {(---+), (+--+), (--+-), (-++-), (++-+), (+++-)}
+        {(---+0), (+--+0), (--+-0), (-++-0), (++-+0), (+++-0)}
         sage: om.faces()
-        [{(0000)},
-         {(-0+-), (0++-), (--00), (++00), (0--+), (+0-+)},
-         {(---+), (+--+), (--+-), (-++-), (++-+), (+++-)}]
+        [{(00000)},
+         {(-0+-0), (0++-0), (--000), (++000), (0--+0), (+0-+0)},
+         {(---+0), (+--+0), (--+-0), (-++-0), (++-+0), (+++-0)}]
 
     To compute the faces of a given dimension, we call::
 
         sage: om.faces(0)
-        {(-0+-), (0++-), (--00), (++00), (0--+), (+0-+)}
+        {(-0+-0), (0++-0), (--000), (++000), (0--+0), (+0-+0)}
 
     We compute the face lattice which we can also plot::
 
@@ -1203,31 +1206,27 @@ class OrientedMatroid(_OrientedMatroidFromMatrix):
     The dual oriented matroid is represented by the circuits and vectors::
 
         sage: om.circuits()
-        {(00++), (-+0+), (00--), (+-0-), (-+-0), (+-+0)}
+        {(0000+), (0000-), (00++0), (-+0+0), (00--0), (+-0-0), (-+-00), (+-+00)}
         sage: om.vectors()
-        {(0000),
-         (-+-+),
-         (00++),
-         (-+0+),
-         (-+++),
-         (00--),
-         (+---),
-         (-+--),
-         (+-0-),
-         (+-+0),
-         (+-+-),
-         (+-++),
-         (-+-0)}
+        {(00000),
+         (+-+-+),
+         (-+++0),
+         (00+++),
+         (00++-),
+         (+-+-0),
+         (+-++0),
+         ...
+         (-+-0+)}
 
     We can directly compute the dual oriented matroid::
 
         sage: om_dual = om.dual()
         sage: om_dual
-        Oriented matroid of dimension 1 with elements of size 4.
-        sage: om_dual.faces()
-        [{(0000)},
-         {(00++), (-+0+), (00--), (+-0-), (-+-0), (+-+0)},
-         {(-+-+), (-+++), (+---), (-+--), (+-+-), (+-++)}]
+        Oriented matroid of dimension 2 with elements of size 5.
+        sage: om_dual.chirotope()
+        [0, 0, 0, 0, +, +, 0, -, -, +]
+        sage: om_dual.f_vector()
+        [1, 8, 18, 12]
 
     Now, we consider an oriented matroid given by its circuits::
 
