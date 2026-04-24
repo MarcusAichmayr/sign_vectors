@@ -18,6 +18,7 @@ from random import choice
 
 from sage.combinat.combination import Combinations
 from sage.combinat.posets.lattices import LatticePoset
+from sage.matroids.constructor import Matroid
 from sage.structure.sage_object import SageObject
 
 from . import SignVector, sign_vector, zero_sign_vector
@@ -248,6 +249,10 @@ class _OrientedMatroid(SageObject):
         if self._dimension is None:
             self._dimension = self.rank - 1
         return self._dimension
+
+    def matroid(self) -> Matroid:
+        r"""The underlying matroid of this oriented matroid."""
+        return Matroid(self.ground_set, bases=self._chirotope.bases())
 
     def loops(self) -> set[int]:
         r"""
@@ -1227,6 +1232,18 @@ class OrientedMatroid(_OrientedMatroidFromMatrix):
         [0, 0, 0, 0, +, +, 0, -, -, +]
         sage: om_dual.f_vector()
         [1, 8, 18, 12]
+
+    We compute the underlying matroid::
+
+        sage: M = om.matroid()
+        sage: M
+        Matroid of rank 2 on 5 elements with 5 bases
+        sage: list(M.bases())
+        [frozenset({0, 1}),
+         frozenset({0, 2}),
+         frozenset({1, 2}),
+         frozenset({0, 3}),
+         frozenset({1, 3})]
 
     Now, we consider an oriented matroid given by its circuits::
 

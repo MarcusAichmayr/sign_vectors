@@ -159,6 +159,15 @@ class Chirotope:
         [+, -, +, 0, -, +, +, 0, -, +]
         sage: c.dual().entries()
         [+, +, 0, -, +, +, 0, +, +, +]
+        sage: c.bases()
+        [[0, 1, 2],
+         [0, 1, 3],
+         [0, 1, 4],
+         [0, 2, 4],
+         [0, 3, 4],
+         [1, 2, 3],
+         [1, 3, 4],
+         [2, 3, 4]]
 
     We construct chirotopes from cocircuits::
 
@@ -206,6 +215,10 @@ class Chirotope:
     def entries(self) -> list[Sign]:
         r"""Return all chirotope entries in lexicographic order."""
         return [self.entry(tuple(rset)) for rset in Combinations(self.ground_set_size, self.rank)]
+
+    def bases(self) -> list[tuple[int]]:
+        r"""Return the bases of the underlying matroid."""
+        return [rset for rset in Combinations(self.ground_set_size, self.rank) if self.entry(tuple(rset)) != Sign.ZERO]
 
     def _set_entries(self) -> None:
         for rset in Combinations(self.ground_set_size, self.rank):
