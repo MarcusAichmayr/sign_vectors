@@ -299,7 +299,7 @@ class SignVector(SageObject):
 
     def length(self) -> int:
         r"""
-        Return the length of the sign vector.
+        Return the length of this sign vector.
 
         EXAMPLES::
 

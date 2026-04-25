@@ -146,24 +146,24 @@ def partial_sign_vector(iterable: list[list[int]] | str | SignVector | PartialSi
 
 
 class PartialSignVector(SageObject):
-    r"""A sign vector."""
+    r"""A partial sign vector."""
 
     __slots__ = ("_negative_support","_zero_support", "_positive_support" )
 
     def __init__(self, negative_support: FrozenBitset, zero_support: FrozenBitset, positive_support: FrozenBitset) -> None:
         r"""
-        Create a sign vector object.
+        Create a partial sign vector object.
 
         INPUT:
 
-        - ``negative_support`` -- a ``FrozenBitset`` representing the negative support.
-        - ``zero_support`` -- a ``FrozenBitset`` representing the zero support.
-        - ``positive_support`` -- a ``FrozenBitset`` representing the positive support.
+        - ``negative_support`` -- a ``FrozenBitset``
+        - ``zero_support`` -- a ``FrozenBitset``
+        - ``positive_support`` -- a ``FrozenBitset``
 
         .. NOTE::
 
             The union of``negative_support``, ``zero_support`` and ``positive_support``should be a full set.
-            For efficiency, this is not checked when creating a sign vector object.
+            For efficiency, this is not checked.
 
         .. SEEALSO::
 
@@ -232,9 +232,9 @@ class PartialSignVector(SageObject):
 
         return res
 
-    def to_string(self, index=None) -> str:
+    def to_string(self) -> str:
         r"""
-        Return a string representation of this sign vector (without parentheses).
+        Return a string representation of this partial sign vector (without parentheses).
 
         EXAMPLES::
 
@@ -250,27 +250,28 @@ class PartialSignVector(SageObject):
             sage: str(X)
             '(0+-)'
         """
-        if index is None:
-            return "".join(self.to_string(index=e) for e in range(self.length()))
+        return "".join(self._index_to_string(e) for e in range(self.length()))
 
-        if self[index] == [-1]:
-            return "-"
-        if self[index] == [0]:
-            return "0"
-        if self[index] == [1]:
-            return "+"
-        if self[index] == [-1, 0]:
-            return "n"
-        if self[index] == [-1, 1]:
-            return "/"
-        if self[index] == [0, 1]:
-            return "p"
-        if self[index] == [-1, 0, 1]:
-            return "*"
+    def _index_to_string(self, index) -> str:
+        match self[index]:
+            case [-1]:
+                return "-"
+            case [0]:
+                return "0"
+            case [1]:
+                return "+"
+            case [-1, 0]:
+                return "n"
+            case [-1, 1]:
+                return "/"
+            case [0, 1]:
+                return "p"
+            case [-1, 0, 1]:
+                return "*"
 
     def length(self) -> int:
         r"""
-        Return the length of the sign vector.
+        Return the length of the partial sign vector.
 
         EXAMPLES::
 
@@ -285,7 +286,7 @@ class PartialSignVector(SageObject):
 
     def __len__(self) -> int:
         r"""
-        Return the length of this sign vector.
+        Return the length of this partial sign vector.
 
         EXAMPLES::
 
@@ -345,7 +346,7 @@ class PartialSignVector(SageObject):
 
     def cardinality(self) -> int:
         r"""
-        Return the number of sign vectors packed in the partial sign vector .
+        Return the number of sign vectors packed in this partial sign vector .
 
         EXAMPLES::
 
@@ -583,12 +584,12 @@ class PartialSignVector(SageObject):
         )
 
     def _connecting_elements(self, other: SignVector | PartialSignVector) -> FrozenBitset:
-        if type(other) is SignVector:
+        if isinstance(other, SignVector):
             other = ExtendedSignVector.from_sign_vector(other)
         return (self._determined_positive_support() & other._determined_positive_support()) | (self._determined_negative_support() & other._determined_negative_support())
 
     def _separating_elements(self, other: SignVector | PartialSignVector) -> FrozenBitset:
-        if type(other) is SignVector:
+        if isinstance(other, SignVector):
             other = ExtendedSignVector.from_sign_vector(other)
         return (self._determined_positive_support() & other._determined_negative_support()) | (self._determined_negative_support()  & other._determined_positive_support())
 
@@ -598,7 +599,7 @@ class PartialSignVector(SageObject):
 
         INPUT:
 
-        - ``other`` -- (partial) sign vector
+        - ``other`` -- a sign vector or partial sign vector
 
         OUTPUT:
         List of elements ``e`` such that ``self[e] == -other[e] != 0``.
@@ -623,7 +624,7 @@ class PartialSignVector(SageObject):
 
         INPUT:
 
-        - ``other`` -- (partial) sign vector
+        - ``other`` -- a sign vector or partial sign vector
 
         OUTPUT:
         List of elements ``e`` such that ``self[e] == -other[e] != 0``.
@@ -648,10 +649,9 @@ class PartialSignVector(SageObject):
 
         INPUT:
 
-        - ``other`` -- a (partial) sign vector
+        - ``other`` -- a sign vector or partial sign vector
 
         OUTPUT:
-
         Composition of this partial sign vector with ``other``.
 
         EXAMPLES::
@@ -684,11 +684,10 @@ class PartialSignVector(SageObject):
 
         INPUT:
 
-        - ``other`` -- a (partial) sign vector.
+        - ``other`` -- a sign vector or partial sign vector
 
         OUTPUT:
-
-        - Returns ``True`` if the (partial) sign vectors are orthogonal and ``False`` otherwise.
+        - Return ``True`` if the (partial) sign vectors are orthogonal and ``False`` otherwise.
 
         EXAMPLES::
 
@@ -756,7 +755,6 @@ class PartialSignVector(SageObject):
         - ``other`` -- a partial sign vector
 
         OUTPUT:
-
         The intersection of this partial sign vector with ``other``.
 
         EXAMPLES::
@@ -793,7 +791,6 @@ class PartialSignVector(SageObject):
         - ``other`` -- a partial sign vector
 
         OUTPUT:
-
         The intersection of this partial sign vector with ``other``.
 
         EXAMPLES::
@@ -873,17 +870,13 @@ class PartialSignVector(SageObject):
 
         return res
 
-    def setminus(self, other: PartialSignVector|set[PartialSignVector]) -> set[PartialSignVector]:
+    def setminus(self, other: PartialSignVector | set[PartialSignVector]) -> set[PartialSignVector]:
         r"""
         Return the set difference of two or more partial sign vectors.
 
         INPUT:
 
         - ``other`` -- a partial sign vector
-
-        OUTPUT:
-
-        The set difference of this partial sign vector with ``other``.
 
         EXAMPLES::
 
@@ -921,10 +914,6 @@ class PartialSignVector(SageObject):
 
         - ``other`` -- a partial sign vector
 
-        OUTPUT:
-
-        The union of this partial sign vector with ``other``.
-
         EXAMPLES::
 
             sage: from sign_vectors.partial_sign_vectors import *
@@ -948,10 +937,6 @@ class PartialSignVector(SageObject):
         r"""
         Return the complement of this partial sign vector.
 
-        OUTPUT:
-
-        The complement of this partial sign vector.
-
         EXAMPLES::
 
             sage: from sign_vectors.partial_sign_vectors import *
@@ -969,7 +954,7 @@ class PartialSignVector(SageObject):
 
     def __eq__(self, other: SignVector | PartialSignVector) -> bool:
         r"""
-        Return whether this partial sign vector is equal to ``other``.
+        Return whether this partial sign vector equals ``other``.
 
         EXAMPLES::
 
@@ -987,7 +972,7 @@ class PartialSignVector(SageObject):
             sage: 0 == PartialSignVector.zero(3)
             True
         """
-        if type(other) is PartialSignVector or type(other) is SignVector or type(other) is ExtendedSignVector:
+        if isinstance(other, (SignVector, ExtendedSignVector, PartialSignVector)):
             return (
                 self._negative_support == other._negative_support
                 and self._positive_support == other._positive_support
@@ -1094,7 +1079,7 @@ class PartialSignVector(SageObject):
 
     def __gt__(self, other: PartialSignVector) -> bool:
         r"""
-        Return whether this sign vector is greater than ``other``.
+        Return whether this partial sign vector is greater than ``other``.
 
         .. SEEALSO::
 
@@ -1126,7 +1111,7 @@ class PartialSignVector(SageObject):
 
     def __neg__(self) -> PartialSignVector:
         r"""
-        Return the sign vectors multiplied by ``-1``.
+        Return this partial sign vectors multiplied by ``-1``.
 
         EXAMPLES::
 
@@ -1139,7 +1124,7 @@ class PartialSignVector(SageObject):
 
     def __pos__(self) -> PartialSignVector:
         r"""
-        Return the sign vectors multiplied by ``1`` which is a copy of this sign vector.
+        Return this partial sign vectors multiplied by ``1`` which is a copy of this object.
 
         EXAMPLES::
 
@@ -1152,13 +1137,9 @@ class PartialSignVector(SageObject):
         """
         return self.__class__(self._negative_support, self._zero_support, self._positive_support)
 
-    def is_vector(self) -> bool:
-        r"""Return ``False`` since sign vectors are not vectors."""
-        return False
-
     def is_sign_vector(self) -> bool:
         r"""
-        Return if the partial sign vector is a sign vector.
+        Return if this partial sign vector is a sign vector.
 
         EXAMPLES::
 
@@ -1186,15 +1167,11 @@ class PartialSignVector(SageObject):
 
     def unpack(self, indices: list[int] = None) -> set[SignVector] | set[PartialSignVector]:
         r"""
-        Return the partial sign vector as a set of (partial) sign vectors, where the given indices are determined.
+        Return this partial sign vector as a set of (partial) sign vectors, where the given indices are determined.
 
         INPUT:
 
         - ``indices`` -- a list of indices, an integer or None
-
-        OUTPUT:
-
-        A set of (partial) sign vectors, where the given indices are determined.
 
         EXAMPLES::
 
@@ -1233,7 +1210,7 @@ class PartialSignVector(SageObject):
 
     def lower_closure(self) -> PartialSignVector:
         r"""
-        Return the lower closure of the partial sign vector.
+        Return the lower closure of this partial sign vector.
 
         EXAMPLES::
 
@@ -1248,7 +1225,7 @@ class PartialSignVector(SageObject):
 
     def upper_closure(self) -> PartialSignVector:
         r"""
-        Return the upper closure of the partial sign vector.
+        Return the upper closure of this partial sign vector.
 
         EXAMPLES::
 
@@ -1263,7 +1240,7 @@ class PartialSignVector(SageObject):
 
     def closure(self) -> PartialSignVector:
        r"""
-        Return the closure of the partial sign vector.
+        Return the closure of this partial sign vector.
 
         EXAMPLES::
 
@@ -1310,7 +1287,7 @@ class PartialSignVector(SageObject):
     @classmethod
     def from_string(cls, s: str) -> PartialSignVector:
         r"""
-        Create a sign vector from a string.
+        Create a partial sign vector from a string.
 
         EXAMPLES::
 
@@ -1328,7 +1305,7 @@ class PartialSignVector(SageObject):
     @classmethod
     def from_iterable(cls, iterable) -> PartialSignVector:
         r"""
-        Create a sign vector from an iterable.
+        Create a partial sign vector from an iterable.
 
         EXAMPLES::
 
@@ -1381,13 +1358,11 @@ class PartialSignVector(SageObject):
     @classmethod
     def from_sign_vector(cls, sv: SignVector) -> PartialSignVector:
         r"""
-        Return a sign vector that as partial sign vector.
+        Return a partial sign vector that is give by a sign vector.
+
         INPUT:
 
         - ``sv`` -- a sign vector.
-
-        OUTPUT:
-        a partial sign vector
 
         .. NOTE::
 
@@ -1406,9 +1381,6 @@ class PartialSignVector(SageObject):
 
 class  ExtendedSignVector(SignVector):
     """Utility class for sign vectors with extra functionality."""
-    def __init__(self, positive_support: FrozenBitset, negative_support: FrozenBitset) -> None:
-        super().__init__(positive_support, negative_support)
-
     def _determined_positive_support(self) -> FrozenBitset:
         return self._positive_support
 
@@ -1417,7 +1389,7 @@ class  ExtendedSignVector(SignVector):
 
     def lower_closure(self) -> PartialSignVector:
         r"""
-        Return the lower closure of the partial sign vector.
+        Return the lower closure.
 
         EXAMPLES::
 
@@ -1432,7 +1404,7 @@ class  ExtendedSignVector(SignVector):
 
     def upper_closure(self) -> PartialSignVector:
         r"""
-        Return the upper closure of the sign vector.
+        Return the upper closure.
 
         EXAMPLES::
 
@@ -1447,7 +1419,7 @@ class  ExtendedSignVector(SignVector):
 
     def closure(self) -> PartialSignVector:
        r"""
-        Return the closure of the sign vector.
+        Return the closure.
 
         EXAMPLES::
 
