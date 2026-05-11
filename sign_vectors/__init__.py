@@ -10,6 +10,6 @@
 
 from __future__ import absolute_import
 
-from .sign_vectors import *
+from .sign_vectors import SignVector, sign_vector, zero_sign_vector, random_sign_vector, sign_symbolic
 from .oriented_matroids import OrientedMatroid
-from .functions import *
+from .functions import lower_closure, upper_closure, total_closure, orthogonal_complement, contraction, deletion, plot_sign_vectors

@@ -233,6 +233,7 @@ def _orthogonal_complement(iterable: set[SignVector]) -> set[PartialSignVector]:
     We consider a list consisting of only one sign vector::
 
         sage: from sign_vectors import *
+        sage: from sign_vectors.partial_sign_vectors import ExtendedSignVector
         sage: from sign_vectors.functions import _orthogonal_complement
         sage: W = ExtendedSignVector.from_sign_vector(sign_vector("+-0"))
         sage: W
@@ -283,10 +284,10 @@ def orthogonal_complement(iterable: set[SignVector]) -> set[SignVector]:
     We consider a list consisting of only one sign vector::
 
         sage: from sign_vectors import *
-        sage: W = ExtendedSignVector.from_sign_vector(sign_vector("+-0"))
-        sage: W
+        sage: X = sign_vector("+-0")
+        sage: X
         (+-0)
-        sage: orthogonal_complement([W])
+        sage: orthogonal_complement([X])
         {(000), (---), (00+), (00-), (++0), (++-), (--0), (--+), (+++)}
 
     Now, we consider a list of three sign vectors::
