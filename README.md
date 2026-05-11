@@ -1,4 +1,4 @@
-# Sign vectors
+# SignVectors
 
 ## Description
 
