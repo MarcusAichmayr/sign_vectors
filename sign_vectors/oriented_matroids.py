@@ -223,6 +223,44 @@ class _OrientedMatroid(SageObject):
         """
         return _OrientedMatroidFromTopes(topes)
 
+    @staticmethod
+    def from_covectors(covectors: list[SignVector | str] | set[SignVector | str]) -> "_OrientedMatroid":
+        r"""
+        Create an oriented matroid from a covector set.
+
+        INPUT:
+
+        - ``covectors`` -- a list or set of sign vectors or strings representing the covectors.
+
+        EXAMPLES::
+
+            sage: from sign_vectors import *
+            sage: om = OrientedMatroid.from_covectors({"+++", "---", "+--", "-++", "0++", "0--", "+00", "-00", "000"})
+            sage: om
+            Oriented matroid of dimension 1 with elements of size 3.
+            sage: om.faces()
+            [{(000)}, {(-00), (+00), (0++), (0--)}, {(---), (+--), (+++), (-++)}]
+            sage: om = OrientedMatroid.from_covectors({"+++", "+--", "0++", "+00", "000"})
+            sage: om
+            Oriented matroid of dimension 1 with elements of size 3.
+            sage: om.faces()
+            [{(000)}, {(-00), (+00), (0++), (0--)}, {(---), (+--), (+++), (-++)}]
+        """
+        if len(covectors) == 0:
+            raise ValueError("Covector set must not be empty.")
+
+        support_length = -1
+
+        for element in covectors:
+            covector = sign_vector(element)
+            if len(covector.support()) > support_length:
+                topes = {covector}
+                support_length = len(covector.support())
+            elif len(covector.support()) == support_length:
+                topes.add(covector)
+
+        return _OrientedMatroidFromTopes(topes)
+
     @property
     def ground_set_size(self) -> int:
         r"""The size of the ground set of this oriented matroid."""
