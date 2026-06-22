@@ -1,6 +1,8 @@
 r"""
 Auxiliary class for functions
-=============================
+
+Partial Sign Vectors
+====================
 
 There are several ways to define partial sign vectors::
 
